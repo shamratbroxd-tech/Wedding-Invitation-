@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shamrat & Junaki Wedding</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top, #111, #000);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+#intro {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.95);
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 10;
+  padding: 20px;
+}
+
+.container {
+  display: none;
+  margin-top: 60px;
+  animation: fadeIn 2s ease;
+  padding: 20px;
+}
+
+h1 {
+  font-family: 'Great Vibes', cursive;
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.box {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  margin: auto;
+  box-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+#countdown {
+  font-size: 20px;
+  margin-top: 15px;
+  color: #ffd6ff;
+}
+
+.heart {
+  animation: pulse 1.2s infinite;
+  display: inline-block;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(30px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes pulse {
+  0% {transform: scale(1);}
+  50% {transform: scale(1.2);}
+  100% {transform: scale(1);}
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+</style>
+</head>
+<body>
+
+<div id="intro">💍 Tap to Open Invitation 💍</div>
+
+<div class="container" id="main">
+  <div class="box">
+    <h1>Wedding Invitation</h1>
+    <h2>Shamrat <span class="heart">❤️</span> Junaki</h2>
+
+    <p>You are cordially invited</p>
+
+    <p>📅 January 28</p>
+    <p>📍 Rain or Shine Wedding Hall</p>
+
+    <div id="countdown"></div>
+  </div>
+</div>
+
+<canvas id="fireworks"></canvas>
+
+<audio id="music" src="https://www.bensound.com/bensound-music/bensound-love.mp3" loop></audio>
+<audio id="boom" src="https://www.soundjay.com/explosion/explosion-01.mp3"></audio>
+
+<script>
+const intro = document.getElementById("intro");
+const main = document.getElementById("main");
+const music = document.getElementById("music");
+
+intro.onclick = () => {
+  intro.style.display = "none";
+  main.style.display = "block";
+  music.play().catch(()=>{});
+};
+
+const targetDate = new Date("Jan 28, 2026 00:00:00").getTime();
+
+setInterval(() => {
+  const now = new Date().getTime();
+  const diff = targetDate - now;
+
+  const d = Math.floor(diff / (1000*60*60*24));
+  const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const s = Math.floor((diff % (1000*60)) / 1000);
+
+  document.getElementById("countdown").innerText =
+    `⏳ ${d}d ${h}h ${m}m ${s}s left`;
+}, 1000);
+
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+const boom = document.getElementById("boom");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let fireworks = [];
+
+function color() {
+  return `hsl(${Math.random()*360},100%,60%)`;
+}
+
+function firework() {
+  const x = Math.random()*canvas.width;
+  const y = Math.random()*canvas.height/2;
+
+  let particles = [];
+
+  for (let i=0;i<70;i++) {
+    particles.push({
+      x, y,
+      angle: Math.random()*Math.PI*2,
+      speed: Math.random()*6+2,
+      r: 2,
+      c: color()
+    });
+  }
+
+  boom.currentTime = 0;
+  boom.play().catch(()=>{});
+
+  fireworks.push(particles);
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  fireworks.forEach((p,i)=>{
+    p.forEach(o=>{
+      o.x += Math.cos(o.angle)*o.speed;
+      o.y += Math.sin(o.angle)*o.speed;
+      o.r *= 0.96;
+
+      ctx.beginPath();
+      ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
+      ctx.fillStyle = o.c;
+      ctx.fill();
+    });
+
+    fireworks[i] = p.filter(o=>o.r>0.5);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+setInterval(firework, 800);
+animate();
+</script>
+
+</body>
+</html>
